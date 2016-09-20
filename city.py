@@ -2,7 +2,6 @@ from math import cos, acos, sqrt
 
 
 class City:
-    prob_type = 'EUC_2D'
     index = 0
     x = 0
     y = 0
@@ -13,7 +12,6 @@ class City:
         self.y = y
 
     def geo(self):
-        self.prob_type = 'GEO'
         pi = 3.141592
         deg = int(self.x)
         minutes = self.x - deg
@@ -47,22 +45,15 @@ class City:
         dist = sqrt((city2.x - self.x)**2 + (city2.y - self.y)**2)
         return dist
 
-def calc_solution(cities):
-    prev_city = cities[-1]
-    distance = 0
-    for c in range(0, len(cities)):
-        cur_city = cities[c]
-        if cur_city.prob_type == 'GEO':
-            distance += cur_city.calc_dist_geo(prev_city)
-        elif cur_city.prob_type == 'EUC_2D':
-            distance += cur_city.calc_dist_euc2d(prev_city)
+    def calc_dist_euc2d_swift(self, city2):
+        dist = ((city2.x - self.x)**2 + (city2.y - self.y)**2)
+        return dist
 
-        prev_city = cur_city
-    return distance
 
 def make_city(id, x, y):
     city = City(id, x, y)
     return city
+
 
 def print_sol(cities):
     tmp = ''

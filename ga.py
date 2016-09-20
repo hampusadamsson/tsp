@@ -1,5 +1,4 @@
-from city import *
-from random import shuffle
+from chromosome import create_ind, create_empty_ind
 import random
 import copy
 
@@ -11,37 +10,32 @@ class Ga:
     elitism = 4
     mutChance = 1
     nrMutates = 3
-
-    def __init__(self, cit):
-        self.cities = cit
+    pop = []
 
     def run(self):
-        sol = calc_solution(self.cities)
-        print(sol)
-
-        pop_size = int(len(self.cities) * 8)
-        generations = len(self.cities) * 8
-        elitism = int(pop_size * 0.1) + 1
+        pop_size = int(len(self.cities) * 14)
+        generations = len(self.cities) * 14
+        elitism = int(pop_size * 0.05) + 1
         mut_rate = 0.1
-        mut_count = int(len(self.cities)*0.3 + 1)
+        mut_count = int(len(self.cities)*0.2 + 1)
 
-        pop = []
         for a in range(0, pop_size):
-            tmp = create_ind(self.cities)
-            pop.append(tmp)
+            tmp = create_ind(self.pop[0])
+            self.pop.append(tmp)
 
         for a in range(0, generations):
-            pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
+            self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
             next_gen = []
 
-        #    print("GEN: " + str(a) + ', POP: ' + str(len(pop)) + ', best: ' + str(pop[len(pop)-1].fit))
+            print("GEN: " + str(a) + ', POP: ' + str(len(self.pop)) + ', best: ' + str(self.pop[len(self.pop)-1].fit))
 
             # selection
+            # crossover
+
             for i in range(elitism, pop_size):
-                parents = self.select(pop)
+                parents = self.select()
                 child = self.two_point(parents[0], parents[1])
                 next_gen.append(child)
-            # crossover
 
             # mutation
             for ind in next_gen:
@@ -52,25 +46,26 @@ class Ga:
 
             # elitism
             for i in range(0, elitism):
-                next_gen.append(pop.pop())
+                next_gen.append(self.pop.pop())
+            self.pop = next_gen
+        self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
+        ans = self.pop[len(self.pop)-1]
+        self.pop = []
+        return ans
 
-            pop = next_gen
-        pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
-        return pop[len(pop)-1].cities
-
-    def sel(self, pop):
-        max_val = sum([(1/c.fit) for c in pop])
+    def sel(self):
+        max_val = sum([(1/c.fit) for c in self.pop])
         pick = random.uniform(0, max_val)
         current = 0
-        for chromosome in pop:
+        for chromosome in self.pop:
             current += (1/chromosome.fit)
             if current > pick:
                 return chromosome
 
-    def select(self, pop):
+    def select(self):
         ret = []
         while len(ret) != 2:
-            selected = self.sel(pop)
+            selected = self.sel()
             ret.append(selected)
             if len(ret) == 2 and ret[0] == ret[1]:
                 ret.pop()
@@ -78,11 +73,7 @@ class Ga:
 
     def one_point(self, ind1, ind2):
         new_ind = copy.deepcopy(ind1)
-        p1 = random.randint(0, len(ind1.cities) - 2)
-    #    print_sol(ind1.cities)
-    #    print_sol(ind2.cities)
-    #    print("--")
-    #    print_sol(new_ind.cities)
+        p1 = random.randint(0, len(ind1.cities) - 1)
 
         for i in range(p1, len(ind1.cities) - 1):
             for j in range(0, len(ind1.cities)-1):
@@ -91,11 +82,8 @@ class Ga:
                     id_swap2 = j
                     new_ind.cities[id_swap], new_ind.cities[id_swap2] = new_ind.cities[id_swap2], new_ind.cities[id_swap]
 
-    #    print_sol(new_ind.cities)
-    #    print("done")
-        new_ind.fit = calc_solution(new_ind.cities)
+        new_ind.calc_solution(new_ind.cities)
         return new_ind
-
 
     def two_point(self, ind1, ind2):
         new_ind = copy.deepcopy(ind1)
@@ -108,8 +96,7 @@ class Ga:
                     id_swap = i
                     id_swap2 = j
                     new_ind.cities[id_swap], new_ind.cities[id_swap2] = new_ind.cities[id_swap2], new_ind.cities[id_swap]
-
-        new_ind.fit = calc_solution(new_ind.cities)
+        new_ind.calc_solution()
         return new_ind
 
     # swaps 2 cities
@@ -120,26 +107,21 @@ class Ga:
         while rand1 == rand2:
             rand2 = random.randint(0, len(cities)-1)
         cities[rand2], cities[rand1] = cities[rand1], cities[rand2]
-        ind.fit = calc_solution(cities)
+        ind.calc_solution()
         return ind
 
+    def load_cities(self, fname):
+        self.pop = []
+        chrome = create_empty_ind()
+        chrome.load_file(fname)
+        self.cities = chrome.cities
+        if len(self.cities) != 0:
+            chrome.calc_solution()
+        self.pop.append(chrome)
 
-def make_ga(cities):
-    gan = Ga(cities)
+
+def make_ga():
+    gan = Ga()
     return gan
 
 
-class Individual:
-    cities = []
-    fit = 0
-
-    def __init__(self, cit):
-        self.cities = cit
-        self.fit = calc_solution(cit)
-
-
-def create_ind(cities):
-    ind = copy.deepcopy(cities)
-    shuffle(ind)
-    new_individual = Individual(ind)
-    return new_individual
