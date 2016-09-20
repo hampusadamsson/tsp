@@ -1,29 +1,35 @@
-from chromosome import create_ind, create_empty_ind
+from chromosome import create_ind
+from city import make_city
 import random
 import copy
 
 
 class Ga:
     cities = []
-    pop_size = 250
-    generations = 250
-    elitism = 4
-    mutChance = 1
-    nrMutates = 3
+    pop_size = 500
+    generations = 500
+    elitism = 10
+    mut_rate = 0.15
+    mut_count = 3
     pop = []
 
-    def run(self):
-        pop_size = int(len(self.cities) * 14)
-        generations = len(self.cities) * 14
-        elitism = int(pop_size * 0.05) + 1
-        mut_rate = 0.1
-        mut_count = int(len(self.cities)*0.2 + 1)
+    def __init__(self):
+        self.cities = []
+        self.pop = []
 
-        for a in range(0, pop_size):
-            tmp = create_ind(self.pop[0])
+    def run(self):
+        self.pop_size = int(len(self.cities) * 14)
+        self.generations = len(self.cities) * 14
+        self.elitism = int(self.pop_size * 0.02) + 1
+        self.mut_rate = 0.1
+        self.mut_count = int(len(self.cities)*0.3 + 1)
+
+        for a in range(0, self.pop_size):
+            tmp = create_ind(self.cities)
+            tmp.shuffle()
             self.pop.append(tmp)
 
-        for a in range(0, generations):
+        for a in range(0, self.generations):
             self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
             next_gen = []
 
@@ -32,28 +38,28 @@ class Ga:
             # selection
             # crossover
 
-            for i in range(elitism, pop_size):
+            for i in range(self.elitism, self.pop_size):
                 parents = self.select()
                 child = self.two_point(parents[0], parents[1])
                 next_gen.append(child)
 
             # mutation
             for ind in next_gen:
-                for i in range(0, mut_count):
+                for i in range(0, self.mut_count):
                     val = random.uniform(0, 1)
-                    if val < mut_rate:
+                    if val < self.mut_rate:
                         self.mutate(ind)
 
             # elitism
-            for i in range(0, elitism):
+            for i in range(0, self.elitism):
                 next_gen.append(self.pop.pop())
             self.pop = next_gen
+
         self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
         ans = self.pop[len(self.pop)-1]
-        self.pop = []
         return ans
 
-    def sel(self):
+    def proportionate_select(self):
         max_val = sum([(1/c.fit) for c in self.pop])
         pick = random.uniform(0, max_val)
         current = 0
@@ -62,10 +68,20 @@ class Ga:
             if current > pick:
                 return chromosome
 
+    def rank_select(self):
+        total = sum(range(0, len(self.pop) + 1))
+        r = random.uniform(0, total)
+        tot = 0
+        for c in range(1, len(self.pop) + 1):
+            if tot + c >= r:
+                return self.pop[c - 1]
+            tot += c
+        assert False, "Shouldn't get here"
+
     def select(self):
         ret = []
         while len(ret) != 2:
-            selected = self.sel()
+            selected = self.rank_select()
             ret.append(selected)
             if len(ret) == 2 and ret[0] == ret[1]:
                 ret.pop()
@@ -111,13 +127,19 @@ class Ga:
         return ind
 
     def load_cities(self, fname):
-        self.pop = []
-        chrome = create_empty_ind()
-        chrome.load_file(fname)
-        self.cities = chrome.cities
-        if len(self.cities) != 0:
-            chrome.calc_solution()
-        self.pop.append(chrome)
+        with open(fname, "r") as ins:
+            cities = []
+            for line in ins:
+                tmp = line.split(' ')
+                tmp = [x for x in tmp if x]
+                if len(tmp) == 3:
+                    try:
+                        city = make_city(tmp[0], float(tmp[1]), float(tmp[2]))
+                        cities.append(city)
+                    except ValueError:
+                        err = ValueError
+        ins.close()
+        self.cities = cities
 
 
 def make_ga():
