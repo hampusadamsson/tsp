@@ -5,24 +5,26 @@ import copy
 
 
 class Ga:
+    rend = False
     cities = []
-    pop_size = 500
-    generations = 500
-    elitism = 10
+    pop_size = 50
+    generations = 50
+    elitism = 1
     mut_rate = 0.15
-    mut_count = 3
+    mut_count = 1
     pop = []
+    use_ann = True
 
-    def __init__(self):
-        self.cities = []
+    def __init__(self, fname):
         self.pop = []
+        self.load_cities(fname)
 
     def run(self):
-        self.pop_size = int(len(self.cities) * 14)
-        self.generations = len(self.cities) * 14
-        self.elitism = int(self.pop_size * 0.02) + 1
-        self.mut_rate = 0.1
-        self.mut_count = int(len(self.cities)*0.3 + 1)
+        # self.pop_size = int(len(self.cities) * 1)
+        # self.generations = len(self.cities) * 1
+        # self.elitism = int(self.pop_size * 0.1) + 1
+        # self.mut_rate = 0.15
+        # self.mut_count = int(len(self.cities)*0.2 + 1)
 
         for a in range(0, self.pop_size):
             tmp = create_ind(self.cities)
@@ -31,26 +33,36 @@ class Ga:
 
         for a in range(0, self.generations):
             self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
+
+            for t in range(0, len(self.pop)-2):
+                self.pop[t].simulated_annealing()
+
+            #self.pop[len(self.pop) - 1].simulated_annealing()
+
             next_gen = []
 
-            print("GEN: " + str(a) + ', POP: ' + str(len(self.pop)) + ', best: ' + str(self.pop[len(self.pop)-1].fit))
+            #  Write out each generation
+            if self.rend:
+                print("GEN: " + str(a) + ', POP: ' + str(len(self.pop)) + ', best: ' + str(self.pop[len(self.pop)-1].fit))
 
-            # selection
-            # crossover
+            #  save to file
+            self.pop[len(self.pop) - 1].save_sol()
 
+            #  selection
+            #  crossover
             for i in range(self.elitism, self.pop_size):
                 parents = self.select()
-                child = self.two_point(parents[0], parents[1])
+                child = self.one_point(parents[0], parents[1])
                 next_gen.append(child)
 
-            # mutation
+            #  mutation
             for ind in next_gen:
                 for i in range(0, self.mut_count):
                     val = random.uniform(0, 1)
                     if val < self.mut_rate:
-                        self.mutate(ind)
+                        ind.mutate()
 
-            # elitism
+            #  elitism
             for i in range(0, self.elitism):
                 next_gen.append(self.pop.pop())
             self.pop = next_gen
@@ -76,7 +88,6 @@ class Ga:
             if tot + c >= r:
                 return self.pop[c - 1]
             tot += c
-        assert False, "Shouldn't get here"
 
     def select(self):
         ret = []
@@ -98,7 +109,7 @@ class Ga:
                     id_swap2 = j
                     new_ind.cities[id_swap], new_ind.cities[id_swap2] = new_ind.cities[id_swap2], new_ind.cities[id_swap]
 
-        new_ind.calc_solution(new_ind.cities)
+        new_ind.calc_solution()
         return new_ind
 
     def two_point(self, ind1, ind2):
@@ -114,17 +125,6 @@ class Ga:
                     new_ind.cities[id_swap], new_ind.cities[id_swap2] = new_ind.cities[id_swap2], new_ind.cities[id_swap]
         new_ind.calc_solution()
         return new_ind
-
-    # swaps 2 cities
-    def mutate(self, ind):
-        cities = ind.cities
-        rand1 = random.randint(0, len(cities)-1)
-        rand2 = rand1
-        while rand1 == rand2:
-            rand2 = random.randint(0, len(cities)-1)
-        cities[rand2], cities[rand1] = cities[rand1], cities[rand2]
-        ind.calc_solution()
-        return ind
 
     def load_cities(self, fname):
         with open(fname, "r") as ins:
@@ -142,8 +142,8 @@ class Ga:
         self.cities = cities
 
 
-def make_ga():
-    gan = Ga()
+def make_ga(fname):
+    gan = Ga(fname)
     return gan
 
 
