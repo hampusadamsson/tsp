@@ -7,24 +7,23 @@ import copy
 class Ga:
     rend = False
     cities = []
-    pop_size = 50
-    generations = 50
-    elitism = 1
+    pop_size = 500
+    generations = 250
+    elitism = 20
     mut_rate = 0.15
     mut_count = 1
     pop = []
-    use_ann = True
 
     def __init__(self, fname):
         self.pop = []
         self.load_cities(fname)
 
     def run(self):
-        # self.pop_size = int(len(self.cities) * 1)
-        # self.generations = len(self.cities) * 1
-        # self.elitism = int(self.pop_size * 0.1) + 1
-        # self.mut_rate = 0.15
-        # self.mut_count = int(len(self.cities)*0.2 + 1)
+        self.pop_size = int(len(self.cities) * 10)
+        self.generations = len(self.cities) * 5
+        self.elitism = int(self.pop_size * 0.1) + 1
+        self.mut_rate = 0.15
+        self.mut_count = int(len(self.cities)*0.2 + 1)
 
         for a in range(0, self.pop_size):
             tmp = create_ind(self.cities)
@@ -34,10 +33,7 @@ class Ga:
         for a in range(0, self.generations):
             self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
 
-            for t in range(0, len(self.pop)-2):
-                self.pop[t].simulated_annealing()
-
-            #self.pop[len(self.pop) - 1].simulated_annealing()
+            self.pop[len(self.pop) - 1].simulated_annealing()
 
             next_gen = []
 
@@ -46,13 +42,13 @@ class Ga:
                 print("GEN: " + str(a) + ', POP: ' + str(len(self.pop)) + ', best: ' + str(self.pop[len(self.pop)-1].fit))
 
             #  save to file
-            self.pop[len(self.pop) - 1].save_sol()
+            #  self.pop[len(self.pop) - 1].save_sol()
 
             #  selection
             #  crossover
             for i in range(self.elitism, self.pop_size):
                 parents = self.select()
-                child = self.one_point(parents[0], parents[1])
+                child = self.two_point(parents[0], parents[1])
                 next_gen.append(child)
 
             #  mutation
@@ -94,12 +90,13 @@ class Ga:
         while len(ret) != 2:
             selected = self.rank_select()
             ret.append(selected)
-            if len(ret) == 2 and ret[0] == ret[1]:
-                ret.pop()
+            # if len(ret) == 2 and ret[0] == ret[1]:
+            #    ret.pop()
         return ret
 
     def one_point(self, ind1, ind2):
         new_ind = copy.deepcopy(ind1)
+
         p1 = random.randint(0, len(ind1.cities) - 1)
 
         for i in range(p1, len(ind1.cities) - 1):

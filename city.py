@@ -11,13 +11,17 @@ class City:
         self.x = x
         self.y = y
 
+
+   # def rank_neigh(self):
+
+
     def close_neigh(self, cities):
         import sys
         closest = 0
         me = sys.modules[__name__]
         best = sys.maxsize
         for c in cities:
-            tmp = self.calc_dist_euc2d(c)
+            tmp = self.calc_dist_euc2d_swift(c)
             if (tmp < best) and (me != c):
                 closest = c
                 best = tmp
