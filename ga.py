@@ -2,28 +2,31 @@ from chromosome import create_ind
 from city import make_city
 import random
 import copy
+from plot import plot_res
 
 
 class Ga:
     rend = False
     cities = []
-    pop_size = 500
-    generations = 250
-    elitism = 20
-    mut_rate = 0.15
-    mut_count = 1
+    pop_size = 25
+    generations = 1000
+    elitism = 5
+    mut_rate = 0.08
+    mut_count = 3
     pop = []
+    solutions = []
 
     def __init__(self, fname):
         self.pop = []
         self.load_cities(fname)
 
     def run(self):
-        self.pop_size = int(len(self.cities) * 10)
-        self.generations = len(self.cities) * 5
-        self.elitism = int(self.pop_size * 0.1) + 1
-        self.mut_rate = 0.15
-        self.mut_count = int(len(self.cities)*0.2 + 1)
+
+        # self.pop_size = int(len(self.cities) * 1)
+        # self.generations = len(self.cities) * 12
+        # self.elitism = int(self.pop_size * 0.5) + 1
+        # self.mut_rate = 0.083
+        # self.mut_count = int(len(self.cities)*0.13 + 1)
 
         for a in range(0, self.pop_size):
             tmp = create_ind(self.cities)
@@ -33,13 +36,15 @@ class Ga:
         for a in range(0, self.generations):
             self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
 
-            self.pop[len(self.pop) - 1].simulated_annealing()
+            # self.pop[len(self.pop) - 1].simulated_annealing()
 
             next_gen = []
 
             #  Write out each generation
             if self.rend:
                 print("GEN: " + str(a) + ', POP: ' + str(len(self.pop)) + ', best: ' + str(self.pop[len(self.pop)-1].fit))
+
+            self.solutions.append(self.pop[len(self.pop)-1].fit)
 
             #  save to file
             #  self.pop[len(self.pop) - 1].save_sol()
@@ -65,6 +70,7 @@ class Ga:
 
         self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
         ans = self.pop[len(self.pop)-1]
+        plot_res(self.solutions)
         return ans
 
     def proportionate_select(self):
@@ -137,6 +143,24 @@ class Ga:
                         err = ValueError
         ins.close()
         self.cities = cities
+
+    def parse_input(self, param):
+        for p in param:
+            par = (p[0])
+            val = (p[1:])
+
+            if par == 'p':
+                self.pop_size = int(val)
+            elif par == 'f':
+                self.generations = int(val)
+            elif par == 'e':
+                self.elitism = int(val)
+            elif par == 'm':
+                self.mut_rate = float(val)
+            elif par == 'r':
+                self.mut_count = int(val)
+            elif par == 'x':
+                self.rend = True
 
 
 def make_ga(fname):

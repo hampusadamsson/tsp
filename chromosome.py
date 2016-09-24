@@ -8,9 +8,9 @@ class Chromosome:
     fit = 1
 
     # SA
-    runs = 1000
+    runs = 100000
     temp = 0.99
-    cooling_dec = 0.9
+    cooling_dec = 0.97
     nr_swaps = 1
 
     def calc_solution(self):
@@ -29,9 +29,14 @@ class Chromosome:
         self.calc_solution()
 
     def save_sol(self, extra):
-        text_file = open("save\\" + extra + '_' + str(self.fit) + ".txt", "w")
+        text_file = open("save/" + extra + '_' + str(self.fit) + ".txt", "w")
         for c in self.cities:
             text_file.write(str(c.index) + ' ' + str(c.x) + ' ' + str(c.y) + '\n')
+        text_file.close()
+
+        text_file = open("solution.csv", "w")
+        for c in self.cities:
+            text_file.write(str(c.index) + '\n')
         text_file.close()
 
     def simulated_annealing(self):
