@@ -71,7 +71,7 @@ class Ga:
         self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
         ans = self.pop[len(self.pop)-1]
         if self.rend:
-            plot_res(self.solutions)
+                plot_res(self.solutions)
         return ans
 
     def proportionate_select(self):
@@ -96,6 +96,7 @@ class Ga:
         ret = []
         while len(ret) != 2:
             selected = self.rank_select()
+            #selected = self.proportionate_select()
             ret.append(selected)
             # if len(ret) == 2 and ret[0] == ret[1]:
             #    ret.pop()
