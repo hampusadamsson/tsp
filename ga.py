@@ -2,6 +2,7 @@ from chromosome import create_ind
 from city import make_city
 import random
 from plot import plot_res
+import copy
 
 
 class Ga:
@@ -86,7 +87,6 @@ class Ga:
         return ans
 
     def proportionate_select(self):
-
         max_val = sum([25000/c.fit for c in self.pop])
         pick = random.uniform(0, max_val)
         current = 0
@@ -104,25 +104,30 @@ class Ga:
                 return self.pop[c - 1]
             tot += c
 
+    def random_select(self):
+        r = int(random.uniform(0, len(self.pop)-1))
+        return self.pop[r]
+
     def select(self):
         ret = []
         while len(ret) != 2:
             selected = self.rank_select()
             # selected = self.proportionate_select()
+            # selected = self.random_select()
             ret.append(selected)
-            if len(ret) == 2 and ret[0] == ret[1]:
-                ret.pop()
+            #if len(ret) == 2 and ret[0] == ret[1]:
+            #    ret.pop()
         return ret
+
 
     def two_point(self, ind1, ind2):
         new_ind = self.trash.pop()
         p1 = random.randint(0, len(ind1.cities) - 1)
         p2 = random.randint(p1, len(ind1.cities) - 1)
 
-        for i in range(0, len(ind1.cities)-1):
-            new_ind.cities[i].index = ind1.cities[i].index
-            new_ind.cities[i].x = ind1.cities[i].x
-            new_ind.cities[i].y = ind1.cities[i].y
+        #for i in range(0, len(new_ind.cities)-1):
+        #    new_ind.cities[i] = copy.copy(ind1.cities[i])
+        new_ind.cities = copy.copy(ind1.cities)
 
         for i in range(p1, p2):
             for j in range(0, len(ind1.cities)-1):
@@ -131,6 +136,7 @@ class Ga:
                     id_swap2 = j
                     new_ind.cities[id_swap], new_ind.cities[id_swap2] = new_ind.cities[id_swap2], new_ind.cities[id_swap]
         new_ind.calc_solution()
+
         return new_ind
 
     def load_cities(self, fname):

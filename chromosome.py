@@ -21,7 +21,7 @@ class Chromosome:
         for c in self.cities:
             cur_city = c
             distance += cur_city.calc_dist_euc2d(prev_city)
-#            distance += cur_city.calc_dist_euc2d_swift(prev_city)
+#             distance += cur_city.calc_dist_euc2d_swift(prev_city)
             prev_city = cur_city
         self.fit = distance
 
