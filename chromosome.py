@@ -8,9 +8,9 @@ class Chromosome:
     fit = 1
 
     # SA
-    runs = 100000
-    temp = 0.99
-    cooling_dec = 0.97
+    runs = 10000
+    temp = 1
+    cooling_dec = 0.999
     nr_swaps = 1
 
     def calc_solution(self):
@@ -32,18 +32,18 @@ class Chromosome:
     def save_sol(self):
         text_file = open("solution.csv", "w")
         for c in self.cities:
-            text_file.write(str(c.index) + '\n')
+            text_file.write(str(c.id) + '\n')
         text_file.close()
 
     def simulated_annealing(self):
         new_ind = create_ind(self.cities)
         self.calc_solution()
+        res = []
 
         for r in range(0, self.runs):
             changes = []
             for t in range(0, self.nr_swaps):
                 r1, r2 = new_ind.mutate()
-#                changes.append([r1, r2])
                 changes.insert(0, [r1, r2])
             if new_ind.fit < self.fit or uniform(0, 1) < self.temp:
                 for r1, r2 in changes:
@@ -53,14 +53,8 @@ class Chromosome:
                 for r1, r2 in changes:
                     new_ind.swap(r2, r1)
             self.cooling()
-
-#            r1, r2 = new_ind.mutate()
-#            if new_ind.fit < self.fit or uniform(0, 1) < self.temp:
-#                self.swap(r1, r2)
-#                self.fit = new_ind.fit
-#            else:
-#                new_ind.swap(r1, r2)
-#            self.cooling()
+            res.append(new_ind.fit)
+        return res
 
     #  swaps 2 cities
     def mutate(self):
@@ -74,6 +68,13 @@ class Chromosome:
         self.cities[rand2], self.cities[rand1] = self.cities[rand1], self.cities[rand2]
         self.calc_solution()
         return rand1, rand2
+
+    def swapclose(self):
+        rand = randint(0, len(self.cities) - 1)
+        prox = self.cities[rand].close_neigh(self.cities)
+        inspos = self.cities.index(prox)
+        cit = self.cities.pop(rand)
+        self.cities.insert(inspos, cit)
 
     def cooling(self):
         self.temp *= self.cooling_dec

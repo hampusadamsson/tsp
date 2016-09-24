@@ -2,18 +2,14 @@ from math import sqrt
 
 
 class City:
-    index = 0
+    id = 0
     x = 0
     y = 0
 
     def __init__(self, index, x, y):
-        self.index = index
+        self.id = index
         self.x = x
         self.y = y
-
-
-   # def rank_neigh(self):
-
 
     def close_neigh(self, cities):
         import sys
@@ -44,5 +40,5 @@ def make_city(id, x, y):
 def print_sol(cities):
     tmp = ''
     for c in cities:
-        tmp += '-'+str(c.index)
+        tmp += '-'+str(c.id)
     print(tmp)

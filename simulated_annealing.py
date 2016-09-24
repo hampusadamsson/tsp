@@ -1,5 +1,7 @@
 from chromosome import create_ind
 from city import make_city
+from plot import plot_res
+
 
 class sim_ann:
     cities = []
@@ -10,7 +12,8 @@ class sim_ann:
 
     def run(self):
         self.individual = create_ind(self.cities)
-        self.individual.simulated_annealing()
+        res = self.individual.simulated_annealing()
+        plot_res(res)
         return self.individual
 
     def load_cities(self, fname):
