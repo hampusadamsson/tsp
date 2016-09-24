@@ -1,7 +1,6 @@
 from chromosome import create_ind
 from city import make_city
 import random
-import copy
 from plot import plot_res
 
 
@@ -15,6 +14,7 @@ class Ga:
     mut_count = 3
     pop = []
     solutions = []
+    trash = []
 
     def __init__(self, fname):
         self.pop = []
@@ -32,6 +32,15 @@ class Ga:
             tmp = create_ind(self.cities)
             tmp.shuffle()
             self.pop.append(tmp)
+
+            tmp = create_ind(self.cities)
+            self.trash.append(tmp)
+
+        for c in self.pop:
+            for ct in range(0,len(c.cities)-1):
+                if '1' == c.cities[ct].index:
+                    c.cities[0], c.cities[ct] = c.cities[ct], c.cities[0]
+                    break
 
         for a in range(0, self.generations):
             self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
@@ -66,6 +75,8 @@ class Ga:
             #  elitism
             for i in range(0, self.elitism):
                 next_gen.append(self.pop.pop())
+
+            self.trash = self.pop
             self.pop = next_gen
 
         self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
@@ -75,11 +86,12 @@ class Ga:
         return ans
 
     def proportionate_select(self):
-        max_val = sum([(1/c.fit) for c in self.pop])
+
+        max_val = sum([25000/c.fit for c in self.pop])
         pick = random.uniform(0, max_val)
         current = 0
         for chromosome in self.pop:
-            current += (1/chromosome.fit)
+            current += (25000/chromosome.fit)
             if current > pick:
                 return chromosome
 
@@ -96,31 +108,21 @@ class Ga:
         ret = []
         while len(ret) != 2:
             selected = self.rank_select()
-            #selected = self.proportionate_select()
+            # selected = self.proportionate_select()
             ret.append(selected)
-            # if len(ret) == 2 and ret[0] == ret[1]:
-            #    ret.pop()
+            if len(ret) == 2 and ret[0] == ret[1]:
+                ret.pop()
         return ret
 
-    def one_point(self, ind1, ind2):
-        new_ind = copy.deepcopy(ind1)
-
-        p1 = random.randint(0, len(ind1.cities) - 1)
-
-        for i in range(p1, len(ind1.cities) - 1):
-            for j in range(0, len(ind1.cities)-1):
-                if new_ind.cities[i].index == ind2.cities[j].index:
-                    id_swap = i
-                    id_swap2 = j
-                    new_ind.cities[id_swap], new_ind.cities[id_swap2] = new_ind.cities[id_swap2], new_ind.cities[id_swap]
-
-        new_ind.calc_solution()
-        return new_ind
-
     def two_point(self, ind1, ind2):
-        new_ind = copy.deepcopy(ind1)
+        new_ind = self.trash.pop()
         p1 = random.randint(0, len(ind1.cities) - 1)
         p2 = random.randint(p1, len(ind1.cities) - 1)
+
+        for i in range(0, len(ind1.cities)-1):
+            new_ind.cities[i].index = ind1.cities[i].index
+            new_ind.cities[i].x = ind1.cities[i].x
+            new_ind.cities[i].y = ind1.cities[i].y
 
         for i in range(p1, p2):
             for j in range(0, len(ind1.cities)-1):
@@ -137,7 +139,7 @@ class Ga:
             for line in ins:
                 tmp = line.split(' ')
                 tmp = [x for x in tmp if x]
-                if len(tmp) == 3:
+                if len(tmp) >= 3:
                     try:
                         city = make_city(tmp[0], float(tmp[1]), float(tmp[2]))
                         cities.append(city)
