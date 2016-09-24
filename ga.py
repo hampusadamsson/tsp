@@ -47,7 +47,7 @@ class Ga:
             self.solutions.append(self.pop[len(self.pop)-1].fit)
 
             #  save to file
-            #  self.pop[len(self.pop) - 1].save_sol()
+            self.pop[len(self.pop) - 1].save_sol()
 
             #  selection
             #  crossover

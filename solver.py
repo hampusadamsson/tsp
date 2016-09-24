@@ -20,7 +20,7 @@ def ga_solver(prob, param):
     print('GA - ' + prob)
     best = GA.run()
     sol = best.fit
-    best.save_sol(prob)
+    best.save_sol()
     print('FIT: ' + str(sol))
     print('----')
 

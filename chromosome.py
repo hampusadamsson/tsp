@@ -28,12 +28,7 @@ class Chromosome:
         shuffle(self.cities)
         self.calc_solution()
 
-    def save_sol(self, extra):
-        text_file = open("save/" + extra + '_' + str(self.fit) + ".txt", "w")
-        for c in self.cities:
-            text_file.write(str(c.index) + ' ' + str(c.x) + ' ' + str(c.y) + '\n')
-        text_file.close()
-
+    def save_sol(self):
         text_file = open("solution.csv", "w")
         for c in self.cities:
             text_file.write(str(c.index) + '\n')
