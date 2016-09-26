@@ -16,6 +16,7 @@ class Ga:
     pop = []
     solutions = []
     trash = []
+    optimal = 0
 
     def __init__(self, fname):
         self.pop = []
@@ -47,7 +48,7 @@ class Ga:
             #  crossover
             for i in range(self.elitism, self.pop_size):
                 parents = self.select()
-#                child = self.two_point(parents[0], parents[1])
+                #child = self.two_point(parents[0], parents[1])
                 child = self.scx(parents[0], parents[1])
                 next_gen.append(child)
 
@@ -68,7 +69,7 @@ class Ga:
         self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
         ans = self.pop[len(self.pop)-1]
         if self.rend:
-                plot_res(self.solutions)
+                plot_res(self.solutions, self.optimal)
         return ans
 
     def proportionate_select(self):
@@ -100,8 +101,8 @@ class Ga:
             #selected = self.proportionate_select()
             #selected = self.random_select()
             ret.append(selected)
-            if len(ret) == 2 and ret[0] == ret[1]:
-                ret.pop()
+#            if len(ret) == 2 and ret[0] == ret[1]:
+#                ret.pop()
         return ret
 
     def scx(self, ind1, ind2):
@@ -177,6 +178,8 @@ class Ga:
                 self.mut_count = int(val)
             elif par == 'x':
                 self.rend = True
+            elif par == 'o':
+                self.optimal = int(val)
 
 
 def scx_h(ind, new_ind):
@@ -190,7 +193,7 @@ def scx_h(ind, new_ind):
                 if dupid == child.id:
                     dup = True
                     break
-            if dup == False:
+            if not dup:
                 return cand
 
     for parent in ind.cities:
@@ -199,7 +202,7 @@ def scx_h(ind, new_ind):
             if parent.id == child.id:
                 dup = True
                 break
-        if dup == False:
+        if not dup:
             cand = parent
             break
     return cand

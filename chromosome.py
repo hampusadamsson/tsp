@@ -1,4 +1,4 @@
-from random import shuffle, uniform, randint
+from random import shuffle, randint
 import copy
 
 
@@ -6,12 +6,6 @@ class Chromosome:
     # GA / SA
     cities = []
     fit = 1
-
-    # SA
-    runs = 10000
-    temp = 1
-    cooling_dec = 0.999
-    nr_swaps = 1
 
     def calc_solution(self):
         if len(self.cities) == 0:
@@ -35,27 +29,6 @@ class Chromosome:
             text_file.write(str(c.id) + '\n')
         text_file.close()
 
-    def simulated_annealing(self):
-        new_ind = create_ind(self.cities)
-        self.calc_solution()
-        res = []
-
-        for r in range(0, self.runs):
-            changes = []
-            for t in range(0, self.nr_swaps):
-                r1, r2 = new_ind.mutate()
-                changes.insert(0, [r1, r2])
-            if new_ind.fit < self.fit or uniform(0, 1) < self.temp:
-                for r1, r2 in changes:
-                    self.swap(r2, r1)
-                self.fit = new_ind.fit
-            else:
-                for r1, r2 in changes:
-                    new_ind.swap(r2, r1)
-            self.cooling()
-            res.append(new_ind.fit)
-        return res
-
     #  swaps 2 cities
     def mutate(self):
         rand1 = randint(0, len(self.cities) - 1)
@@ -75,10 +48,6 @@ class Chromosome:
         inspos = self.cities.index(prox)
         cit = self.cities.pop(rand)
         self.cities.insert(inspos, cit)
-
-    def cooling(self):
-        self.temp *= self.cooling_dec
-
 
 
 def create_ind(cities):
