@@ -65,6 +65,7 @@ class Chromosome:
                         best = self.fit
                         self.save_sol()
                         improves = True
+                        print best
                     else:
                         self.cities = rev_back
         return res
@@ -73,6 +74,7 @@ class Chromosome:
         res = []
         best = 9999999
         best_c = []
+
         for i in range(len(self.cities)-1, 0, -1):
             c1 = self.cities.pop(i)
             heap = [c1]
@@ -90,6 +92,9 @@ class Chromosome:
                 best = self.fit
                 best_c = copy.copy(self.cities)
                 self.save_sol()
+
+            print best
+            break
         self.cities = best_c
         self.calc_solution()
         return res

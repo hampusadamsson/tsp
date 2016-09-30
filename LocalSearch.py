@@ -1,6 +1,6 @@
 from chromosome import create_ind
 from city import make_city
-
+from plot import plot_res
 
 class LocalSearch:
     cities = []
@@ -14,17 +14,31 @@ class LocalSearch:
         self.load_cities(fname)
 
     def run(self):
+        res = []
 
         if self.function == "l":
-            self.individual.local_search()
-        elif self.function == "s":
-            self.individual.simulated_annealing()
-        elif self.function == "a":
-            self.individual.simulated_annealing_two_opt()
-        elif self.function == "t":
-            self.individual.two_opt()
+            res += self.individual.local_search()
+            res += self.individual.two_opt()
 
+        elif self.function == "s":
+            res += self.individual.simulated_annealing()
+        elif self.function == "a":
+            res += self.individual.simulated_annealing_two_opt()
+        elif self.function == "t":
+            res += self.individual.two_opt()
+
+        plot_res(res, self.optimal)
         return self.individual
+
+    def load_sols(self):
+        #fname = "/home/hampus/prog/tsp/sol_1mil.csv"
+        #fname = "/home/hampus/PycharmProjects/solution.csv"
+        fname = "start.csv"
+        ord = []
+        with open(fname, "r") as ins:
+            for line in ins:
+                ord.append(int(line))
+        return ord
 
     def load_cities(self, fname):
         with open(fname, "r") as ins:
@@ -38,10 +52,31 @@ class LocalSearch:
                         cities.append(city)
                     except ValueError:
                         err = ValueError
-        ins.close()
+
         self.cities = cities
         self.create_distance_matrix()
+
+        ins.close()
+        if 1==1:
+            print "read_all"
+            # ------
+            sol = []
+            order = self.load_sols()
+            for o in order:
+                for c in cities:
+                    if c.id == o:
+                        sol.append(c)
+            cities = sol
+
+        print "copied_all"
+        # ------
+        self.cities = cities
+        #self.create_distance_matrix()
+
+        print "matrix created"
         self.individual = create_ind(self.cities, self.dist_matrix)
+        self.individual.calc_solution()
+        #print self.individual.fit
 
     def create_distance_matrix(self):
         self.dist_matrix.append(["E"])
