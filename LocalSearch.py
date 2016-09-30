@@ -1,6 +1,5 @@
 from chromosome import create_ind
 from city import make_city
-from plot import plot_res
 
 
 class LocalSearch:
@@ -15,19 +14,15 @@ class LocalSearch:
         self.load_cities(fname)
 
     def run(self):
-        res = []
 
         if self.function == "l":
-            res = self.individual.local_search()
+            self.individual.local_search()
         elif self.function == "s":
-            res = self.individual.simulated_annealing()
+            self.individual.simulated_annealing()
         elif self.function == "a":
-            res = self.individual.simulated_annealing_two_opt()
+            self.individual.simulated_annealing_two_opt()
         elif self.function == "t":
-            res = self.individual.two_opt()
-
-        if self.rend:
-            plot_res(res, self.optimal)
+            self.individual.two_opt()
 
         return self.individual
 
@@ -61,7 +56,6 @@ class LocalSearch:
         for p in param:
             par = (p[0])
             val = (p[1:])
-
             if par == 'f':
                 self.individual.runs = int(val)
             elif par == 't':
@@ -72,8 +66,8 @@ class LocalSearch:
                 self.optimal = float(val)
             elif par == 'g':
                 self.individual.group_size = int(val)
-            elif par == 'x':
-                self.rend = True
+#            elif par == 'x':
+#                self.rend = True
             elif par == 'z':
                 self.function = val
 

@@ -11,6 +11,7 @@ class City:
         self.x = x
         self.y = y
 
+    # RETURN NEAREST NEIGHBOR
     def close_neigh(self, cities):
         import sys
         closest = 0
@@ -30,6 +31,7 @@ class City:
 
         return dist
 
+    # FASTER THAN calc_dist_euc2d AND PERSEVERE THE RELATION.
     def calc_dist_euc2d_swift(self, city2):
         if self.id == city2.id:
             return 99999999

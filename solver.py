@@ -24,6 +24,14 @@ def local_search_solver(prob, param):
 
 
 if sys.argv[1] == '-help' or sys.argv[1] == '-h' or sys.argv[1] == '--help' or sys.argv[1] == '--h':
+    print("-z [alg], alg = s,a,l,t,ga")
+    print("     (s)imulated annealing")
+    print("     simul(a)ted annealing with 2-OPT")
+    print("     (t)wo-OPT")
+    print("     (ga) genetic algorithm")
+    print("     hil(l) climb")
+    print("-c cooling")
+    print("-t temperature")
     print("-p for population size (-p 100)")
     print("-f for fitness evaluations / generations (-f 100)")
     print("-e for elitism (-e 25)")

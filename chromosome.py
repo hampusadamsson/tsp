@@ -3,12 +3,9 @@ import copy
 
 
 class Chromosome:
-    # GA / SA
     cities = []
     fit = 1
     dist_matrix = []
-
-    # SA
     runs = 10000
     temp = 1
     cooling_dec = 0.999
@@ -21,10 +18,7 @@ class Chromosome:
         distance = 0
         for c in self.cities:
             cur_city = c
-#            distance += cur_city.calc_dist_euc2d(prev_city)
-#            print(cur_city.id + '-' + prev_city.id)
             distance += self.dist_matrix[cur_city.id][prev_city.id]
-
             prev_city = cur_city
         self.fit = distance
 
@@ -41,7 +35,6 @@ class Chromosome:
     def two_opt_swap(self, i, k):
         l1 = []
         l2 = []
-
         for x in range(0, i):
             l1.append(self.cities.pop(0))
         for y in range(0, k):
@@ -58,7 +51,6 @@ class Chromosome:
         best = self.fit
         res.append(best)
         improves = True
-
         gen = 0
         while improves:
             gen += 1
@@ -79,11 +71,8 @@ class Chromosome:
 
     def local_search(self):
         res = []
-
         best = 9999999
         best_c = []
-
-        # EVERY STARTING POINT GREEDY
         for i in range(len(self.cities)-1, 0, -1):
             c1 = self.cities.pop(i)
             heap = [c1]
@@ -94,16 +83,13 @@ class Chromosome:
                 assert c2 not in heap
                 heap.append(c2)
                 c1 = c2
-
             self.cities = heap
             self.calc_solution()
             res.append(self.fit)
-
             if self.fit < best:
                 best = self.fit
                 best_c = copy.copy(self.cities)
                 self.save_sol()
-
         self.cities = best_c
         self.calc_solution()
         return res
@@ -115,21 +101,17 @@ class Chromosome:
         for r in range(0, self.runs):
             i = randint(0, len(self.cities) - 2)
             k = randint(0, len(self.cities)-i)
-
             rev_back = copy.copy(self.cities)
             self.two_opt_swap(i, k)
             self.calc_solution()
-
             if best > self.fit or uniform(0, 1) < self.temp:
                 best = self.fit
             else:
                 self.cities = rev_back
                 self.fit = best
                 self.save_sol()
-
             self.cooling()
             res.append(best)
-
         self.fit = best
         return res
 
@@ -147,7 +129,6 @@ class Chromosome:
             else:
                 new_ind.swap(r2, r1)
             res.append(new_ind.fit)
-
         return res
 
     def cooling(self):
@@ -165,13 +146,6 @@ class Chromosome:
         self.calc_solution()
         return rand1, rand2
 
-    def swapclose(self):
-        rand = randint(0, len(self.cities) - 1)
-        prox = self.cities[rand].close_neigh(self.cities)
-        inspos = self.cities.index(prox)
-        cit = self.cities.pop(rand)
-        self.cities.insert(inspos, cit)
-
     def find_close(self, cit1, popu):
         res = 0
         best = 99999999
@@ -179,43 +153,6 @@ class Chromosome:
             if self.dist_matrix[cit1.id][c.id] < best:
                 best = self.dist_matrix[cit1.id][c.id]
                 res = c
-        return res
-
-    def two_opt_swap(self, i, k):
-        l1 = []
-        l2 = []
-
-        for x in range(0, i):
-            l1.append(self.cities.pop(0))
-        for y in range(0, k):
-            if len(self.cities) <= 0:
-                break
-            l2.insert(0, self.cities.pop(0))
-
-        self.cities = l1 + l2 + self.cities
-
-    def two_opt(self):
-        res = []
-        swaps = len(self.cities) - 1
-        self.calc_solution()
-        best = self.fit
-        res.append(best)
-        improves = True
-
-        while improves:
-            improves = False
-            for i in range(0, swaps):
-                for k in range(i + 1, swaps):
-                    rev_back = copy.copy(self.cities)
-                    self.two_opt_swap(i, k)
-                    self.calc_solution()
-                    res.append(best)
-                    if self.fit < best:
-                        best = self.fit
-                        self.save_sol()
-                        improves = True
-                    else:
-                        self.cities = rev_back
         return res
 
 
