@@ -24,10 +24,15 @@ class City:
         return closest
 
     def calc_dist_euc2d(self, city2):
+        if self.id == city2.id:
+            return 99999999
         dist = sqrt((city2.x - self.x)**2 + (city2.y - self.y)**2)
+
         return dist
 
     def calc_dist_euc2d_swift(self, city2):
+        if self.id == city2.id:
+            return 99999999
         dist = ((city2.x - self.x)**2 + (city2.y - self.y)**2)
         return dist
 

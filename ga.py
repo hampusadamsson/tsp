@@ -1,8 +1,8 @@
 from chromosome import create_ind
 from city import make_city
-import random
 from plot import plot_res
 import copy
+import random
 
 
 class Ga:
@@ -17,20 +17,27 @@ class Ga:
     solutions = []
     trash = []
     optimal = 0
+    dist_matrix = []
 
     def __init__(self, fname):
         self.pop = []
         self.load_cities(fname)
 
     def run(self):
+
+        # INIT POP
         for a in range(0, self.pop_size):
-            tmp = create_ind(self.cities)
+            tmp = create_ind(self.cities, self.dist_matrix)
             tmp.shuffle()
             self.pop.append(tmp)
 
-            tmp = create_ind(self.cities)
+            tmp = create_ind(self.cities, self.dist_matrix)
             self.trash.append(tmp)
 
+        print len(self.pop)
+#       print len(next_gen)
+
+        # START LOOP
         for a in range(0, self.generations):
             self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
             next_gen = []
@@ -48,8 +55,8 @@ class Ga:
             #  crossover
             for i in range(self.elitism, self.pop_size):
                 parents = self.select()
-                #child = self.two_point(parents[0], parents[1])
                 child = self.scx(parents[0], parents[1])
+                #child = self.two_point(parents[0], parents[1])
                 next_gen.append(child)
 
             #  mutation
@@ -59,9 +66,11 @@ class Ga:
                     if val < self.mut_rate:
                         ind.mutate()
 
+
             #  elitism
             for i in range(0, self.elitism):
                 next_gen.append(self.pop.pop())
+
 
             self.trash = self.pop
             self.pop = next_gen
@@ -69,7 +78,7 @@ class Ga:
         self.pop.sort(key=lambda chromosome: chromosome.fit, reverse=True)
         ans = self.pop[len(self.pop)-1]
         if self.rend:
-                plot_res(self.solutions, self.optimal)
+            plot_res(self.solutions, self.optimal)
         return ans
 
     def proportionate_select(self):
@@ -85,9 +94,9 @@ class Ga:
         total = sum(range(0, len(self.pop) + 1))
         r = random.uniform(0, total)
         tot = 0
-        for c in range(1, len(self.pop) + 1):
+        for c in range(0, len(self.pop)+1):
             if tot + c >= r:
-                return self.pop[c - 1]
+                return self.pop[c-1]
             tot += c
 
     def random_select(self):
@@ -97,9 +106,8 @@ class Ga:
     def select(self):
         ret = []
         while len(ret) != 2:
-            selected = self.rank_select()
-            #selected = self.proportionate_select()
-            #selected = self.random_select()
+            #selected = self.rank_select()
+            selected = self.random_select()
             ret.append(selected)
 #            if len(ret) == 2 and ret[0] == ret[1]:
 #                ret.pop()
@@ -114,23 +122,20 @@ class Ga:
             cand1 = scx_h(ind1, new_ind)
             cand2 = scx_h(ind2, new_ind)
 
-            if new_ind.cities[-1].calc_dist_euc2d_swift(cand1) <= new_ind.cities[-1].calc_dist_euc2d_swift(cand2):
+            c1 = int(new_ind.cities[-1].id)
+            if self.dist_matrix[c1][int(cand1.id)] <= self.dist_matrix[c1][int(cand2.id)]:
                 new_ind.cities.append(copy.copy(cand1))
             else:
                 new_ind.cities.append(copy.copy(cand2))
+
+        # not needed though
         new_ind.calc_solution()
         return new_ind
-
-
 
     def two_point(self, ind1, ind2):
         new_ind = self.trash.pop()
         p1 = random.randint(0, len(ind1.cities) - 1)
         p2 = random.randint(p1, len(ind1.cities) - 1)
-
-        #for i in range(0, len(new_ind.cities)-1):
-        #    new_ind.cities[i] = copy.copy(ind1.cities[i])
-        new_ind.cities = copy.copy(ind1.cities)
 
         for i in range(p1, p2):
             for j in range(0, len(ind1.cities)-1):
@@ -141,6 +146,7 @@ class Ga:
         new_ind.calc_solution()
         return new_ind
 
+
     def load_cities(self, fname):
         with open(fname, "r") as ins:
             cities = []
@@ -149,7 +155,7 @@ class Ga:
                 tmp = [x for x in tmp if x]
                 if len(tmp) >= 3:
                     try:
-                        city = make_city(tmp[0], float(tmp[1]), float(tmp[2]))
+                        city = make_city(int(tmp[0]), float(tmp[1]), float(tmp[2]))
                         cities.append(city)
                     except ValueError:
                         err = ValueError
@@ -160,6 +166,20 @@ class Ga:
         self.elitism = int(self.pop_size * 0.1) + 1
         self.mut_rate = 0.083
         self.mut_count = int(len(self.cities)*0.13 + 1)
+        self.create_distance_matrix()
+
+
+
+    def create_distance_matrix(self):
+        self.dist_matrix.append(["E"])
+        for c1 in self.cities:
+            tmp = ["E"]
+            for c2 in self.cities:
+                val = (c1.calc_dist_euc2d(c2))
+                tmp.append(val)
+            self.dist_matrix.append(tmp)
+
+#        print(self.dist_matrix[0][0])
 
     def parse_input(self, param):
         for p in param:
@@ -186,16 +206,14 @@ def scx_h(ind, new_ind):
     for i in range(0, len(ind.cities)-2):
         if ind.cities[i].id == new_ind.cities[-1].id:
             cand = ind.cities[i+1]
-            dupid = cand.id
 
-            dup = False
             for child in new_ind.cities:
-                if dupid == child.id:
-                    dup = True
-                    break
-            if not dup:
-                return cand
+                if cand.id == child.id:
+                    return scx_h2(ind, new_ind)
+            return cand
+    return scx_h2(ind, new_ind)
 
+def scx_h2(ind, new_ind):
     for parent in ind.cities:
         dup = False
         for child in new_ind.cities:

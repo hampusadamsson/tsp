@@ -1,4 +1,5 @@
 from ga import make_ga
+from LocalSearch import make_local_search
 import sys
 
 
@@ -6,12 +7,21 @@ def ga_solver(prob, param):
     GA = make_ga(prob)
     GA.parse_input(param)
 
-    print('GA - ' + prob)
     best = GA.run()
     sol = best.fit
     best.save_sol()
-    print('FIT: ' + str(sol))
-    print('----')
+    print(str(sol))
+
+
+def local_search_solver(prob, param):
+    sim = make_local_search(prob)
+    sim.parse_input(param)
+
+    best = sim.run()
+    sol = best.fit
+    best.save_sol()
+    print(str(sol))
+
 
 if sys.argv[1] == '-help' or sys.argv[1] == '-h' or sys.argv[1] == '--help' or sys.argv[1] == '--h':
     print("-p for population size (-p 100)")
@@ -30,4 +40,7 @@ else:
 
     prob.reverse()
     prob.pop()
-    ga_solver(city, prob)
+    if "ga" in sys.argv:
+        ga_solver(city, prob)
+    else:
+        local_search_solver(city, prob)
